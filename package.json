@@ -1,10 +1,9 @@
 {
-  "name": "backend",
+  "name": "game-store-backend",
   "version": "1.0.0",
-  "description": "Học kỳ 1, Năm học 2023-2024",
+  "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,14 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "cors": "^2.8.5",
-    "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "knex": "^3.0.1",
-    "mariadb": "^3.2.2"
-  },
-  "devDependencies": {
-    "eslint": "^8.53.0",
-    "eslint-config-prettier": "^9.0.0",
-    "prettier": "^3.0.3"
+    "mysql": "^2.18.1"
   }
 }
