@@ -2,23 +2,26 @@ const express = require('express');
 const cors = require('cors');
 
 const app = express();
-const contactsRouter = require('./routes/contacts.router');
+const usersRouter = require('./routes/users.router');
+const gamesRouter = require('./routes/games.router');
 
 const {
-resourceNotFound,
-handleError
+    resourceNotFound,
+    handleError
 } = require('./controllers/errors.controller');
 
 app.use(cors());
 app.use(express.json());
+
 app.get('/', (req, res) => {
-    res.json({ message: 'Welcome to contact book application.'});
+    res.json({ message: 'Welcome to the application.' });
 });
-app.get('/', (req, res) => {
-    res.json({ message: 'Welcome to contact book application.' });
-});
-app.use('/app/contacts', contactsRouter);
-app.use('/api/contacts', contactsRouter);
+
+// Kết nối router cho quản lý người dùng
+app.use('/api/users', usersRouter);
+
+// Kết nối router cho quản lý game
+app.use('/api/games', gamesRouter);
 
 // Xử lý lỗi 404.
 app.use(resourceNotFound);
