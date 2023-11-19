@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const makeUserService = require('../services/user.service');
+const makeUserService = require('../services/users.service');
 const ApiError = require('../api-error');
 
 const saltRounds = 10;
