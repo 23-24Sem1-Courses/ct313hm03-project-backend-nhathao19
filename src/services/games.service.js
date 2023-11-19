@@ -5,8 +5,7 @@ function makeGamesService() {
     function readGame(payload) {
         const game = {
             title: payload.title,
-            genre: payload.genre,
-            release_date: payload.release_date,
+            describe: payload.describe,
             // Các trường khác của game
         };
 
@@ -25,7 +24,7 @@ function makeGamesService() {
     }
 
     async function getManyGames(query) {
-        const { title, genre, page = 1, limit = 5 } = query;
+        const { title, page = 1, limit = 5 } = query;
         const paginator = new Paginator(page, limit);
 
         let results = await knex('games')
@@ -33,17 +32,13 @@ function makeGamesService() {
                 if (title) {
                     builder.where('title', 'like', `%${title}%`);
                 }
-                if (genre) {
-                    builder.where('genre', genre);
-                }
                 // Các điều kiện tìm kiếm khác
             })
             .select(
                 knex.raw('count(id) OVER() AS recordsCount'),
                 'id',
                 'title',
-                'genre',
-                'release_date'
+                'describe'
                 // Các trường khác của game
             )
             .limit(paginator.limit)
