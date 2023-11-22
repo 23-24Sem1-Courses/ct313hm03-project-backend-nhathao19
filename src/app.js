@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.json({ message: 'Welcome to the application.' });
+    res.json({ message: 'Welcome to the application!!!' });
 });
 
 // Kết nối router cho quản lý người dùng
