@@ -1,12 +1,5 @@
-const bcrypt = require('bcrypt');
 const knex = require('../database/knex');
 const Paginator = require('./paginator');
-
-const saltRounds = 10;
-
-async function hashPassword(password) {
-    return bcrypt.hash(password, saltRounds);
-}
 
 function makeUserService() {
     function readUser(payload) {
@@ -15,7 +8,7 @@ function makeUserService() {
             email: payload.email,
             first_name: payload.first_name,
             last_name: payload.last_name,
-            // password: payload.password, // Không lưu mật khẩu trực tiếp trong service
+            password: payload.password, // Không lưu mật khẩu trực tiếp trong service
         };
 
         // Remove undefined fields
@@ -28,12 +21,9 @@ function makeUserService() {
 
     async function createUser(payload) {
         const user = readUser(payload);
-        const hashedPassword = await hashPassword(payload.password);
-        const [id] = await knex('user_account').insert({
-            ...user,
-            password: hashedPassword,
-        });
-        return { id, ...user };
+        const [id] = await knex('user_account').insert(user);
+        const createdUser = await knex('user_account').where('user_id', id).first();
+        return createdUser;
     }
 
     async function getManyUsers(query) {
@@ -82,7 +72,7 @@ function makeUserService() {
 
         // Không cập nhật mật khẩu nếu không được cung cấp
         if (payload.password) {
-            update.password = await hashPassword(payload.password);
+            update.password = payload.password; // Bạn có thể thêm logic mã hóa ở đây nếu cần
         }
 
         return knex('user_account').where('user_id', id).update(update);

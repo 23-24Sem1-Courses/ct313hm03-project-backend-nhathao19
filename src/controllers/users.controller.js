@@ -1,34 +1,16 @@
-const bcrypt = require('bcrypt');
+
 const makeUserService = require('../services/users.service');
 const ApiError = require('../api-error');
 
-const saltRounds = 10;
 
-async function hashPassword(password) {
-    return bcrypt.hash(password, saltRounds);
-}
 
 async function createUser(req, res, next) {
-    const { username, email, first_name, last_name, password } = req.body;
-
-    // Kiểm tra xem các trường thông tin cần thiết có tồn tại không
-    if (!username || !email || !first_name || !last_name || !password) {
-        return next(new ApiError(400, 'All fields are required'));
-    }
-
     try {
         const userService = makeUserService();
-        const hashedPassword = await hashPassword(password);
-        const user = await userService.createUser({
-            username,
-            email,
-            first_name,
-            last_name,
-            password: hashedPassword,
-        });
-        return res.send(user);
+        const user = await userService.createUser(req.body);
+        return res.status(201).json(user);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return next(
             new ApiError(500, 'An error occurred while creating the user')
         );
@@ -36,19 +18,16 @@ async function createUser(req, res, next) {
 }
 
 async function getUsersByFilter(req, res, next) {
-    let users = [];
-
     try {
         const userService = makeUserService();
-        users = await userService.getManyUsers(req.query);
+        const users = await userService.getManyUsers(req.query);
+        return res.send(users);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return next(
             new ApiError(500, 'An error occurred while retrieving users')
         );
     }
-
-    return res.send(users);
 }
 
 async function getUser(req, res, next) {
@@ -60,7 +39,7 @@ async function getUser(req, res, next) {
         }
         return res.send(user);
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return next(
             new ApiError(
                 500,
@@ -71,27 +50,15 @@ async function getUser(req, res, next) {
 }
 
 async function updateUser(req, res, next) {
-    const { username, email, first_name, last_name, password } = req.body;
-
-    // Kiểm tra xem dữ liệu cập nhật có trống hay không
-    if (!Object.keys(req.body).length) {
-        return next(new ApiError(400, 'Data to update can not be empty'));
-    }
-
     try {
         const userService = makeUserService();
-        const update = await userService.updateUser(req.params.id, {
-            username,
-            email,
-            first_name,
-            last_name,
-            password,
-        });
+        const update = await userService.updateUser(req.params.id, req.body);
         if (!update) {
             return next(new ApiError(404, 'User not found'));
         }
+        return res.send({ message: 'User was updated successfully' });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return next(
             new ApiError(500, `Error updating user with id=${req.params.id}`)
         );
@@ -107,7 +74,7 @@ async function deleteUser(req, res, next) {
         }
         return res.send({ message: 'User was deleted successfully' });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return next(
             new ApiError(
                 500,
@@ -125,7 +92,7 @@ async function deleteAllUsers(req, res, next) {
             message: `${deleted} users were deleted successfully`,
         });
     } catch (error) {
-        console.log(error);
+        console.error(error);
         return next(
             new ApiError(500, 'An error occurred while removing all users')
         );
