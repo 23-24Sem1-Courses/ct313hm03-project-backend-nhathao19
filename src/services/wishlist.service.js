@@ -1,24 +1,22 @@
-// Import knex hoặc database connection
 const knex = require('../database/knex');
 const ApiError = require('../api-error');
-const Paginator = require('../path/to/Paginator'); // Đường dẫn đến thư viện Paginator
 
 function makeWishlistService() {
-  async function getWishlist(userId, query) {
+  async function getWishlist(userId, { page = 1, limit = 10 }) {
     try {
-      const { page = 1, limit = 10 } = query;
-      const paginator = new Paginator(page, limit);
-
-      // Thực hiện logic để lấy thông tin Wishlist từ database với phân trang
-      const wishlist = await knex
-        .select()
-        .table('wishlist')
+      const wishlist = await knex('wishlist')
         .where({ user_id: userId })
-        .limit(paginator.limit)
-        .offset(paginator.offset);
+        .limit(limit)
+        .offset((page - 1) * limit);
+
+      const totalItems = await knex('wishlist').where({ user_id: userId }).count('game_id as total').first();
 
       return {
-        metadata: paginator.getMetadata(wishlist.length),
+        metadata: {
+          page,
+          limit,
+          totalItems: totalItems.total,
+        },
         wishlist,
       };
     } catch (error) {
@@ -28,8 +26,10 @@ function makeWishlistService() {
 
   async function addToWishlist(userId, gameId) {
     try {
-      // Thực hiện logic để thêm Game vào Wishlist trong database
-      await knex('wishlist').insert({ user_id: userId, game_id: gameId });
+      const exists = await knex('wishlist').where({ user_id: userId, game_id: gameId }).first();
+      if (!exists) {
+        await knex('wishlist').insert({ user_id: userId, game_id: gameId });
+      }
     } catch (error) {
       throw new ApiError(500, 'An error occurred while adding to wishlist');
     }
@@ -37,8 +37,10 @@ function makeWishlistService() {
 
   async function removeFromWishlist(userId, gameId) {
     try {
-      // Thực hiện logic để xóa Game khỏi Wishlist trong database
-      await knex('wishlist').where({ user_id: userId, game_id: gameId }).del();
+      const exists = await knex('wishlist').where({ user_id: userId, game_id: gameId }).first();
+      if (exists) {
+        await knex('wishlist').where({ user_id: userId, game_id: gameId }).del();
+      }
     } catch (error) {
       throw new ApiError(500, 'An error occurred while removing from wishlist');
     }

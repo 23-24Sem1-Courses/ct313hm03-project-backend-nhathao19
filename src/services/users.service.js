@@ -29,7 +29,7 @@ function makeUserService() {
     async function createUser(payload) {
         const user = readUser(payload);
         const hashedPassword = await hashPassword(payload.password);
-        const [id] = await knex('users').insert({
+        const [id] = await knex('user_account').insert({
             ...user,
             password: hashedPassword,
         });
@@ -40,7 +40,7 @@ function makeUserService() {
         const { username, email, page = 1, limit = 5 } = query;
         const paginator = new Paginator(page, limit);
 
-        let results = await knex('users')
+        let results = await knex('user_account')
             .where((builder) => {
                 if (username) {
                     builder.where('username', 'like', `%${username}%`);
@@ -50,8 +50,8 @@ function makeUserService() {
                 }
             })
             .select(
-                knex.raw('count(id) OVER() AS recordsCount'),
-                'id',
+                knex.raw('count(user_id) OVER() AS recordsCount'),
+                'user_id',
                 'username',
                 'email',
                 'first_name',
@@ -74,7 +74,7 @@ function makeUserService() {
     }
 
     async function getUserById(id) {
-        return knex('users').where('id', id).select('*').first();
+        return knex('user_account').where('user_id', id).select('*').first();
     }
 
     async function updateUser(id, payload) {
@@ -85,15 +85,15 @@ function makeUserService() {
             update.password = await hashPassword(payload.password);
         }
 
-        return knex('users').where('id', id).update(update);
+        return knex('user_account').where('user_id', id).update(update);
     }
 
     async function deleteUser(id) {
-        return knex('users').where('id', id).del();
+        return knex('user_account').where('user_id', id).del();
     }
 
     async function deleteAllUsers() {
-        return knex('users').del();
+        return knex('user_account').del();
     }
 
     return {

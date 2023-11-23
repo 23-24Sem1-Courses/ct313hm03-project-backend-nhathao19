@@ -1,14 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const wishlistController = require('../controllers/wishlistcontroller');
-const authMiddleware = require('../middlewares/authMiddleware');
+const wishlistController = require('../controllers/wishlist.controller');
+const { methodNotAllowed } = require('../controllers/errors.controller');
 
-// Middleware để kiểm tra đăng nhập
-router.use(authMiddleware.requireAuth);
 
 // Routes liên quan đến Wishlist
-router.get('/', wishlistController.getWishlist);
-router.post('/:gameId/add', wishlistController.addToWishlist);
-router.post('/:gameId/remove', wishlistController.removeFromWishlist);
+router
+    .route('/wishlist/:id')
+    .get(wishlistController.getWishlist)
+    .post(wishlistController.addToWishlist)
+    .delete(wishlistController.removeFromWishlist)
+    .all(methodNotAllowed);
 
 module.exports = router;

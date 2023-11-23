@@ -1,5 +1,6 @@
 const express = require('express');
 const gamesController = require('../controllers/games.controller');
+const userController = require('../controllers/users.controller');
 const { methodNotAllowed } = require('../controllers/errors.controller');
 const router = express.Router();
 
@@ -15,6 +16,11 @@ router
     .get(gamesController.getGameById)
     .put(gamesController.updateGame)
     .delete(gamesController.deleteGame)
+    .all(methodNotAllowed);
+
+router
+    .route('/users/:id')
+    .get(userController.getUser)
     .all(methodNotAllowed);
 
 module.exports = router;

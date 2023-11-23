@@ -5,7 +5,8 @@ function makeGamesService() {
     function readGame(payload) {
         const game = {
             title: payload.title,
-            describe: payload.describe,
+            description: payload.description,
+            price: payload.price
             // Các trường khác của game
         };
 
@@ -19,7 +20,7 @@ function makeGamesService() {
 
     async function createGame(payload) {
         const game = readGame(payload);
-        const [id] = await knex('games').insert(game);
+        const [id] = await knex('game_list').insert(game);
         return { id, ...game };
     }
 
@@ -27,7 +28,7 @@ function makeGamesService() {
         const { title, page = 1, limit = 5 } = query;
         const paginator = new Paginator(page, limit);
 
-        let results = await knex('games')
+        let results = await knex('game_list')
             .where((builder) => {
                 if (title) {
                     builder.where('title', 'like', `%${title}%`);
@@ -35,10 +36,10 @@ function makeGamesService() {
                 // Các điều kiện tìm kiếm khác
             })
             .select(
-                knex.raw('count(id) OVER() AS recordsCount'),
-                'id',
+                knex.raw('count(game_id) OVER() AS recordsCount'),
+                'game_id',
                 'title',
-                'describe'
+                'description'
                 // Các trường khác của game
             )
             .limit(paginator.limit)
@@ -58,20 +59,20 @@ function makeGamesService() {
     }
 
     async function getGameById(id) {
-        return knex('games').where('id', id).select('*').first();
+        return knex('game_list').where('game_id', id).select('*').first();
     }
 
     async function updateGame(id, payload) {
         const update = readGame(payload);
-        return knex('games').where('id', id).update(update);
+        return knex('game_list').where('game_id', id).update(update);
     }
 
     async function deleteGame(id) {
-        return knex('games').where('id', id).del();
+        return knex('game_list').where('game_id', id).del();
     }
 
     async function deleteAllGames() {
-        return knex('games').del();
+        return knex('game_list').del();
     }
 
     return {
